@@ -2,6 +2,7 @@ import csv
 import json
 import random
 import re
+import os
 
 with open('myMad.json', encoding = 'utf-8') as file:
     templates = json.load(file)
@@ -46,6 +47,14 @@ class MadLib:
         self.cities = places
         self.songs = songs
 
+    def writeLib(self, count, madlib):
+        #if os.path.isfile('madlib.txt' == False):
+        f = open('madlib.txt', 'w')
+        f.write(madlib)
+        f.close()
+        #else:
+        #   self.writeLib(count+1, madlib)
+
     def constructMadLib(self):
         '''Create The MadLib'''
 
@@ -53,7 +62,10 @@ class MadLib:
         empties = re.findall(r'\[.+?\]', usableTemplate)
         print(empties)
 
-        tempEmpties = empties
+        tempEmpties = []
+        for word in empties:
+            tempEmpties.append(word)
+        
 
         same = (False, None)
 
@@ -61,10 +73,9 @@ class MadLib:
             for j in range(i):
                 if empties[i] == tempEmpties[j]:
                     same = (True, j)
-                else:
-                    same = (False, None)
+                    
             if same[0] == True:
-                empties[i] = tempEmpties[same[1]]
+                empties[i] = empties[same[1]]
             else:
                 if 'Name' in empties[i] and 'Place' not in empties[i] and 'Song' not in empties[i]:
                     empties[i] = random.choice(self.names)
@@ -87,13 +98,22 @@ class MadLib:
                     else:
                         empties[i] = random.choice(self.verbs)
 
-                elif 'Describing' in empties[i]:
+                elif ('Describing' or 'Feeling') in empties[i]:
                     empties[i] = random.choice(self.adjs)
 
                 elif 'Number' in empties[i]:
                     empties[i] = str(random.randint(0, 1000))
 
-        print(empties)
+
+        for i in range(len(empties)):
+            re.sub(re.escape(tempEmpties[i]), empties[i], usableTemplate)
+            print(i)
+            print(tempEmpties[i])
+            print(re.findall(re.escape(tempEmpties[i]), usableTemplate))
+
+        self.writeLib(0, usableTemplate)
+
+
 
 
 testMadLib = MadLib(vi, vt, noun, adj, names, cities, songTitles)
